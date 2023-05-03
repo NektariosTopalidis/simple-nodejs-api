@@ -3,19 +3,30 @@ import { v4 as uuidv4 } from 'uuid';
 
 let users = [];
 
-export const createUser = (req,res) => {
+export const createUser = (req,res,next) => {
     const user = req.body;
+    if(!user){
+        return res.status(402).json({message:'No User Provided'});
+    }
+    try{
     users.push({...user,id: uuidv4()});
     res.send(`User with the name ${user.name} ${user.lastName} is added to the database.`);
+    }catch(err){
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    }
 }
-
 export const getUsers = (req,res) => {
     res.send(users);
 }
 
-export const getUser = (req,res) => {
+export const getUser = (req,res,next) => {
     const id = req.params.id; 
-
+    if(!id){
+        return res.status(402).json({message:'No id'});
+    }
     const foundUser = users.find((user) => user.id === id);
 
     res.send(foundUser);
